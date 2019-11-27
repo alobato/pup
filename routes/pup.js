@@ -74,4 +74,8 @@ router.get('/', async (req, res) => {
 
 })
 
+router.get('/test', async (req, res) => {
+  return res.send({ success: true })
+})
+
 module.exports = router
