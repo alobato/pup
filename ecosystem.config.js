@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const PROJECT_NAME = 'pup'
 const NODE_VERSION = '12.6.0'
+const SSH_USER = process.env.SSH_USER
 
 module.exports = {
   apps : [{
@@ -22,12 +23,12 @@ module.exports = {
 
   deploy : {
     production : {
-      user : process.env.USER,
+      user : SSH_USER,
       host : process.env.HOST,
       ref  : 'origin/master',
       repo : process.env.REPO,
-      path : `/home/${USER}/apps/${PROJECT_NAME}`,
-      'post-deploy' : `/home/${USER}/.nvm/versions/node/v${NODE_VERSION}/bin/npm install && /home/${USER}/.nvm/versions/node/v${NODE_VERSION}/bin/pm2 reload ecosystem.config.js --env production`
+      path : `/home/${SSH_USER}/apps/${PROJECT_NAME}`,
+      'post-deploy' : `/home/${SSH_USER}/.nvm/versions/node/v${NODE_VERSION}/bin/npm install && /home/${SSH_USER}/.nvm/versions/node/v${NODE_VERSION}/bin/pm2 reload ecosystem.config.js --env production`
     }
   }
 }
