@@ -35,7 +35,7 @@ router.get('/close', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const { h, url, z = 4, l } = req.query
+    const { h, css = '', url, z = 4, l } = req.query
 
     let browser
     if (l) {
@@ -46,7 +46,7 @@ router.get('/', async (req, res) => {
     }
   
     const page = await browser.newPage()
-    const html = `<html><body style="margin:0;padding:0;"><div id="main" style="display:inline-block;">${h}</div></body></html>`
+    const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8" /><style>${css}</style></head><body style="margin:0;padding:0;"><div id="main" style="display:inline-block;">${h}</div></body></html>`
     await page.goto(`data:text/html,${html}`, { waitUntil: 'networkidle0' })
     const filename = Math.random().toString(36).substring(7)
     await page.screenshot({path: path.join('./public/', `${filename}.png`)})
