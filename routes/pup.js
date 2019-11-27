@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
 
     const { h, c = '', url, z = 4, l } = req.query
 
-    const cssReset = `
+    const css = `
 *, *::before, *::after {
   box-sizing: border-box;
 }
