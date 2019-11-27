@@ -35,7 +35,28 @@ router.get('/close', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const { h, css = '', url, z = 4, l } = req.query
+
+    const { h, c = '', url, z = 4, l } = req.query
+
+    const cssReset = `
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+html {
+  font-family: sans-serif;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+}
+body {
+  margin: 0;
+}
+${c}
+`
 
     let browser
     if (l) {
