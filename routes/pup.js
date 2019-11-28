@@ -7,6 +7,8 @@ const fs = require('fs')
 const { promisify } = require('util')
 const writeFileAsync = promisify(fs.writeFile)
 const readFileAsync = promisify(fs.readFile)
+const md5 = require('md5')
+const cache = require('memory-cache')
 
 const onDisconnected = async () => {
   console.log('Disconnected!')
@@ -34,10 +36,27 @@ router.get('/close', async (req, res) => {
   }
 })
 
+const respondData = (res, filename, t) => {
+  if (t === 'b64') {
+    const b64 = fs.readFileSync('/path/to/file.jpg', { encoding: 'base64' })
+    return res.send({ base64: `data:image/png;base64,${b64}` })
+  } else if (t === 'url') {
+    return res.send({ url: `http://${process.env.HOST}/${filename}.png` })
+  }
+  res.contentType('image/png') 
+  return res.sendFile(path.resolve('./public/', `${filename}.png`))
+}
+
 router.get('/', async (req, res) => {
   try {
 
     const { h, c = '', z = 4, l, t = '' } = req.query
+
+    const hash = md5(`${c}${h}${z}`)
+    const cachedFileName = cache.get(hash)
+    if (cachedFileName) {
+      return respondData(res, cachedFileName, t)
+    }
 
     const css = `
 *, *::before, *::after {
@@ -70,6 +89,9 @@ ${c}
     const bodyHandle = await page.$('#main')
     const { width, height } = await bodyHandle.boundingBox()
     await page.screenshot({ path: path.join('./public/', `${filename}.png`), clip: { x: 0, y: 0, width, height }, type: 'png' })  
+    
+    cache.put(hash, filename)
+    
     await bodyHandle.dispose()
   
     if (l) {
@@ -78,17 +100,7 @@ ${c}
       await browser.disconnect()
     }
 
-    if (t === 'b64') {
-      const bitmap = fs.readFileSync(path.join('./public/', `${filename}.png`))
-      const b64 = new Buffer(bitmap).toString('base64')
-      return res.send({ base64: `data:image/png;base64,${b64}` })
-    } else if (t === 'url') {
-      return res.send({ url: `http://${process.env.HOST}/${filename}.png` })
-    }
-
-    res.contentType('image/png') 
-    return res.sendFile(path.resolve('./public/', `${filename}.png`))
-
+    return respondData(res, filename, t)
 
   } catch(err) {
     console.log('err', err)
