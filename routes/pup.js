@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const router = express.Router()
 const puppeteer = require('puppeteer')
@@ -36,7 +37,7 @@ router.get('/close', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
 
-    const { h, c = '', url, z = 4, l } = req.query
+    const { h, c = '', z = 4, l, t = '' } = req.query
 
     const css = `
 *, *::before, *::after {
@@ -76,12 +77,18 @@ ${c}
     } else {
       await browser.disconnect()
     }
-  
-    if (url) {
-      return res.send({ url: `http://localhost:8000/${filename}.png` })
+
+    if (t === 'b64') {
+      const bitmap = fs.readFileSync(path.join('./public/', `${filename}.png`))
+      const b64 = new Buffer(bitmap).toString('base64')
+      return res.send({ base64: `data:image/png;base64,${b64}` })
+    } else if (t === 'url') {
+      return res.send({ url: `http://${process.env.HOST}/${filename}.png` })
     }
+
     res.contentType('image/png') 
     return res.sendFile(path.resolve('./public/', `${filename}.png`))
+
 
   } catch(err) {
     console.log('err', err)
