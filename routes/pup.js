@@ -38,7 +38,7 @@ router.get('/close', async (req, res) => {
 
 const respondData = (res, filename, t) => {
   if (t === 'b64') {
-    const b64 = fs.readFileSync('/path/to/file.jpg', { encoding: 'base64' })
+    const b64 = fs.readFileSync(path.resolve('./public/', `${filename}.png`), { encoding: 'base64' })
     return res.send({ base64: `data:image/png;base64,${b64}` })
   } else if (t === 'url') {
     return res.send({ url: `http://${process.env.HOST}/${filename}.png` })
