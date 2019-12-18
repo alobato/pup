@@ -7,7 +7,15 @@ const routes = require('./routes')
 
 const app = express()
 
-app.use(cors())
+// app.use(cors())
+
+app.use(cors({
+  origin: (origin, callback) => {
+    return callback(null, true)
+  },
+  optionsSuccessStatus: 200,
+  credentials: true
+}))
 
 app.use(morgan('combined'))
 

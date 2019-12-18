@@ -4,6 +4,7 @@ const PROJECT_NAME = 'pup'
 const NODE_VERSION = '12.6.0'
 const SSH_USER = process.env.SSH_USER
 
+
 module.exports = {
   apps : [{
     name: PROJECT_NAME,
