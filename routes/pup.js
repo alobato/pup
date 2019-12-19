@@ -8,7 +8,7 @@ const { promisify } = require('util')
 const writeFileAsync = promisify(fs.writeFile)
 const readFileAsync = promisify(fs.readFile)
 const md5 = require('md5')
-const cache = require('memory-cache')
+// const cache = require('memory-cache')
 
 const onDisconnected = async () => {
   console.log('Disconnected!')
@@ -50,13 +50,19 @@ const respondData = (res, filename, t) => {
 router.get('/', async (req, res) => {
   try {
 
+    // h -> html, c -> css, z -> zoom, l -> launch, t -> type (b64, url)
     const { h, c = '', z = 4, l, t = '' } = req.query
 
     const hash = md5(`${c}${h}${z}`)
-    const cachedFileName = cache.get(hash)
-    if (cachedFileName) {
-      return respondData(res, cachedFileName, t)
+
+    if (fs.existsSync(path.join('./public/', `${hash}.png`))) {
+      return respondData(res, hash, t)
     }
+
+    // const cachedFileName = cache.get(hash)
+    // if (cachedFileName) {
+    //   return respondData(res, cachedFileName, t)
+    // }
 
     const css = `
 *, *::before, *::after {
@@ -84,13 +90,14 @@ ${c}
     const page = await browser.newPage()
     const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8" /><style>${css}</style></head><body style="margin:0;padding:0;"><div id="main" style="display:inline-block;">${h}</div></body></html>`
     await page.goto(`data:text/html,${encodeURIComponent(html)}`, { waitUntil: 'networkidle0' })
-    const filename = Math.random().toString(36).substring(7)
+    // const filename = Math.random().toString(36).substring(7)
+    const filename = hash
     await page.screenshot({path: path.join('./public/', `${filename}.png`)})
     const bodyHandle = await page.$('#main')
     const { width, height } = await bodyHandle.boundingBox()
     await page.screenshot({ path: path.join('./public/', `${filename}.png`), clip: { x: 0, y: 0, width, height }, type: 'png' })  
     
-    cache.put(hash, filename)
+    // cache.put(hash, filename)
     
     await bodyHandle.dispose()
   
