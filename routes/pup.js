@@ -88,7 +88,12 @@ ${c}
     }
   
     const page = await browser.newPage()
-    const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8" /><style>${css}</style></head><body style="margin:0;padding:0;"><div id="main" style="display:inline-block;">${h}</div></body></html>`
+
+    let html = h
+    if (!h.toLowerCase().startsWith('<!doctype')) {
+      html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8" /><style>${css}</style></head><body style="margin:0;padding:0;"><div id="main" style="display:inline-block;">${h}</div></body></html>`
+    }
+
     await page.goto(`data:text/html,${encodeURIComponent(html)}`, { waitUntil: 'networkidle0' })
     // const filename = Math.random().toString(36).substring(7)
     const filename = hash
