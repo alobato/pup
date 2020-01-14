@@ -116,6 +116,74 @@ ${c}
 
 })
 
+router.post('/', async (req, res) => {
+  try {
+    // h -> html, c -> css, z -> zoom, l -> launch, t -> type (b64, url)
+    const { h, c = '', z = 4, l, t = '' } = req.body
+
+    const hash = md5(`${c}${h}${z}`)
+
+    if (fs.existsSync(path.join('./public/', `${hash}.png`))) {
+      return respondData(res, hash, t)
+    }
+
+    // const cachedFileName = cache.get(hash)
+    // if (cachedFileName) {
+    //   return respondData(res, cachedFileName, t)
+    // }
+
+    const css = `
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+html {
+  font-family: sans-serif;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  margin: 0;
+}
+${c}
+`
+
+    let browser
+    if (l) {
+      browser = await puppeteer.launch({ headless: true, defaultViewport: { width: 648, height: 648, deviceScaleFactor: z } })
+    } else {
+      const ws = await readFileAsync('ws.txt', 'utf8')
+      browser = await puppeteer.connect({ browserWSEndpoint: ws, defaultViewport: { width: 648, height: 648, deviceScaleFactor: z } })
+    }
+  
+    const page = await browser.newPage()
+    const html = h.toLowerCase().includes('<!doctype') ? h : `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8" /><style>${css}</style></head><body style="margin:0;padding:0;"><div id="main" style="display:inline-block;">${h}</div></body></html>`    
+    await page.goto(`data:text/html,${encodeURIComponent(html)}`, { waitUntil: 'networkidle0' })
+    // const filename = Math.random().toString(36).substring(7)
+    const filename = hash
+    await page.screenshot({path: path.join('./public/', `${filename}.png`)})
+    const bodyHandle = await page.$('#main')
+    const { width, height } = await bodyHandle.boundingBox()
+    await page.screenshot({ path: path.join('./public/', `${filename}.png`), clip: { x: 0, y: 0, width, height }, type: 'png' })  
+    
+    // cache.put(hash, filename)
+    
+    await bodyHandle.dispose()
+  
+    if (l) {
+      await browser.close()
+    } else {
+      await browser.disconnect()
+    }
+
+    return respondData(res, filename, t)
+
+  } catch(err) {
+    console.log('err', err)
+    return res.send({ success: false })
+  }
+
+})
+
 router.get('/test', async (req, res) => {
   return res.send({ success: true })
 })
