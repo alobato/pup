@@ -41,7 +41,8 @@ const respondData = (res, filename, t) => {
     const b64 = fs.readFileSync(path.resolve('./public/', `${filename}.png`), { encoding: 'base64' })
     return res.send({ base64: `data:image/png;base64,${b64}` })
   } else if (t === 'url') {
-    return res.send({ url: `http://${process.env.HOST}/${filename}.png` })
+    // return res.send({ url: `http://${process.env.HOST}/${filename}.png` })
+    return res.send({ url: `https://services.telerison.com/${filename}.png` })
   }
   res.contentType('image/png') 
   return res.sendFile(path.resolve('./public/', `${filename}.png`))
