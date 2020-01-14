@@ -119,7 +119,7 @@ ${c}
 router.post('/', async (req, res) => {
   try {
     // h -> html, c -> css, z -> zoom, l -> launch, t -> type (b64, url)
-    const { h, c = '', z = 4, l, t = '' } = req.body
+    const { h, c = '', z = 4, l, t = 'url' } = req.body
 
     const hash = md5(`${c}${h}${z}`)
 
