@@ -169,7 +169,10 @@ ${c}
     // cache.put(hash, filename)
     
     await bodyHandle.dispose()
-  
+
+    // https://stackoverflow.com/questions/51971760/managing-puppeteer-for-memory-and-performance
+    await page.close()
+
     if (l) {
       await browser.close()
     } else {
