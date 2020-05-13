@@ -10,12 +10,28 @@ const readFileAsync = promisify(fs.readFile)
 const md5 = require('md5')
 // const cache = require('memory-cache')
 
+
+// https://github.com/puppeteer/puppeteer/issues/715
+// I've wrapped the code into and now it doesn't hang
+
+// try {
+//   // do your stuff here
+
+// } catch(e) {
+//   console.log(e)
+//   process.exit()
+// }
+// finally {
+//   browser.close()
+// }
+
+
 const onDisconnected = async () => {
   console.log('Disconnected!')
 }
 
 router.get('/open', async (req, res) => {
-  const { z = 4 } = req.query
+  const { z = 2 } = req.query
   const browser = await puppeteer.launch({ headless: true, defaultViewport: { width: 648, height: 648, deviceScaleFactor: z } })  
   await writeFileAsync('ws.txt', browser.wsEndpoint())
   return res.send({ ws: browser.wsEndpoint() })
@@ -52,7 +68,7 @@ router.get('/', async (req, res) => {
   try {
 
     // h -> html, c -> css, z -> zoom, l -> launch, t -> type (b64, url)
-    const { h, c = '', z = 4, l, t = '' } = req.query
+    const { h, c = '', z = 2, l, t = '' } = req.query
 
     const hash = md5(`${c}${h}${z}`)
 
@@ -123,7 +139,7 @@ ${c}
 router.post('/', async (req, res) => {
   try {
     // h -> html, c -> css, z -> zoom, l -> launch, t -> type (b64, url)
-    const { h, c = '', z = 4, l, t = 'url' } = req.body
+    const { h, c = '', z = 2, l, t = 'url' } = req.body
 
     const hash = md5(`${c}${h}${z}`)
 
